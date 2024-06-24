@@ -2,10 +2,16 @@
 import pygame
 import numpy
 import itertools
+from Board import draw_board
+from Piece import Piece
 
 #naming: black pawn is bp, white pawn is wp, and so on...
 
 pieces = {}
+board = numpy.full((8, 8), "", dtype="<U6")
+
+black_queens = 1 #number of queens, so that promoted pawns have unique IDs
+white_queens = 1
 
 pygame.init()
 window_height, window_width = 1280, 1280
@@ -14,56 +20,93 @@ screen = pygame.display.set_mode((window_width, window_height))
 clock = pygame.time.Clock()
 
 white = pygame.Color(255, 255, 255)
-black = pygame.Color(0, 0, 0)
-altblack = pygame.Color(202, 93, 43)
-altwhite = pygame.Color(249, 214, 177)
+black = pygame.Color(0, 0, 0)              
 
-class Piece(pygame.sprite.Sprite):
+white_moves = [] #to check valid king moves and determine if there is checkmate
+black_moves = []
 
-    def __init__(self, id, pos, image):
+class King(Piece): #inherits the piece class
+    def get_moves(self):
+        self.moves = []
+        if self.has_moved == False: #castling
 
-        pygame.sprite.Sprite.__init__(self)
-        self.id = id
-        self.pos = pos
-        self.x = pos[1]
-        self.y = pos[0]
-        self.image = image
-        self.color = self.id[0]
+            if pieces[f"{self.color}r1"].has_moved == False: #castling to the left
+                if board[self.y, (self.x - 1)] == '' and board[self.y, (self.x - 2)] == '' and board[self.y, (self.x - 3) == '']: #if space uninterrupted
+
+                    if self.color == "b":
+                        if board[self.y, (self.x - 1)] not in white_moves and board[self.y, (self.x - 2)] not in white_moves and board[self.y, (self.x - 3)] not in white_moves: #if not moving through check
+                           self.moves.append([self.y, (self.x - 3)]) 
+                    else:
+                        if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x - 2)] not in black_moves and board[self.y, (self.x - 3)] not in black_moves: #if not moving through check
+                            self.moves.append([self.y, (self.x - 3)])
+
+            if pieces[f"{self.color}r2"].has_moved == False: #castling to the right
+                if board[self.y, (self.x + 1)] == '' and board[self.y, (self.x + 2)] == '': #if space uninterrupted
+
+                    if self.color == "b":
+                        if board[self.y, (self.x + 1)] not in white_moves and board[self.y, (self.x + 2)] not in white_moves: #if not moving through check
+                           self.moves.append([self.y, (self.x + 2)]) 
+                    else:
+                        if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x + 2)] not in black_moves: #if not moving through check
+                            self.moves.append([self.y, (self.x + 2)])
+        
+        self.moves.append([(self.y + 1), (self.x)]) #move up
+        self.moves.append([(self.y - 1), (self.x)]) #move down
+        self.moves.append([(self.y), (self.x - 1)]) #move left
+        self.moves.append([(self.y), (self.x + 1)]) #move right
+        self.moves.append([(self.y - 1), (self.x - 1)]) #move bottom left
+        self.moves.append([(self.y - 1), (self.x + 1)]) #move bottom right
+        self.moves.append([(self.y + 1), (self.x + 1)]) #move top right
+        self.moves.append([(self.y + 1), (self.x - 1)]) #move top left
+
+        self.remove_invalid()
 
         if self.color == "b":
-            self.color = "black"
-        else:
-            self.color = "white"
-        self.image = f"{self.color}{self.image}.png"
-        self.image = pygame.image.load(f"{self.image}")
-        self.image = pygame.transform.scale(self.image, (500, 500))
-        self.rect = self.image.get_rect()
-        
+            for move in self.moves:
+                if move in white_moves:
+                    self.moves.remove(move)
+            if black_moves == [] and self.moves == []: #if no moves available, aka checkmate
+                pass #end game
+        else: #white
+            for move in self.moves:
+                if move in black_moves:
+                    self.moves.remove(move)
+            if white_moves == [] and self.moves == []:
+                pass #end game
 
-    def __repr__(self):
-        return f"ID: {self.id}, POS: {self.pos}"
-    
-    def get_captured(self):
-        pieces.pop(self.id)
-
-class King(Piece):
-    def get_moves(self):
-        moves = []
 class Queen(Piece):
     def get_moves(self):
-        moves = []
+        self.moves = []
+
 class Rook(Piece):
     def get_moves(self):
-        moves = []
+        self.moves = []
+
 class Knight(Piece):
     def get_moves(self):
-        moves = []
+        self.moves = []
+
 class Bishop(Piece):
     def get_moves(self):
-        moves = []
+        self.moves = []
+
 class Pawn(Piece):
     def get_moves(self):
-        moves = []
+        self.moves = []
+        if self.has_moved == False:
+            pass
+
+
+
+    def promote(self):
+        global black_queens, white_queens
+
+        if self.color == "black":
+            black_queens += 1
+            Queen(f"{self.color}q{black_queens}") 
+        else:
+            white_queens += 1
+            Queen(f"{self.color}q{white_queens}")
 
 
 
@@ -93,12 +136,12 @@ def setup_board(board_size): #place pieces
     board[7, 5] = "wb2"
 
     #queens
-    board[0, 3] = "bq1"
-    board[7, 3] = "wq2"
+    board[0, 3] = "bq"
+    board[7, 3] = "wq"
 
     #kings
-    board[0, 4] = "bk1"
-    board[7, 4] = "wk2"
+    board[0, 4] = "bk"
+    board[7, 4] = "wk"
 
     for space, i in enumerate(board[6]): #create white pawns
         board[6, space] = f"wp{space + 1}"
@@ -125,67 +168,38 @@ def setup_board(board_size): #place pieces
                         x = Queen(i, [column, space], "queen")
                     case "p": #pawn
                         x = Pawn(i, [column, space], "pawn")
-
+                x.move_to_start()
                 pieces[x.id] = x
 
 
-
-def draw_board(window_height, window_width, board_size):#draw bg tiles
-
-    tile_height = window_height // board_size
-    tile_width = window_width // board_size
-
-    counter = 0 #move down one tile after filling all 8 in a horizontal row
-    offset = False #create checkered pattern by starting with either black or white
-
-    for i in range(board_size): #two nested loops, deepest loop draws horizontally while outermost loop (this one) moves down one tile
-
-        escape_counter = 0 #escape horizontal loop
-
-        tile_height = window_height // board_size
-        tile_width = window_width // board_size
-
-
-        for color_1 in itertools.cycle('AB'): #cycle between
-            if color_1 == 'A':
-                if offset == True:
-                    color_choice = altblack
-                else:
-                    color_choice = altwhite
-            elif color_1 == 'B':
-                if offset == True:
-                    color_choice = altwhite
-                else:
-                    color_choice = altblack
-
-            tile = pygame.Rect(tile_width * (escape_counter), tile_height * counter, tile_height, tile_width)
-            pygame.Surface.fill(screen, color_choice, rect=tile)
-            escape_counter += 1
-            if escape_counter >= 9:
-                break
-        
-
-        counter += 1
-        if offset == False:
-            offset = True
-        else:
-            offset = False
-
 screen.fill("white")
 setup_board(8)
-draw_board(window_height, window_width, 8)
+draw_board(window_height, window_width, 8, screen)
 
 piece_group = pygame.sprite.Group()
-for item in pieces.values():
-        pygame.sprite.Group.add(piece_group, item)
 
 
 while True:
-    for event in pygame.event.get():
+
+    white_moves = [] #to check valid king moves and determine if there is checkmate
+    black_moves = []
+
+    for item in pieces.values():
+        if item.id[1] != "k": #ignore king moves at first so we can check theirs later
+            item.get_moves()
+        pygame.sprite.Group.add(piece_group, item)
+
+    for item in pieces.values():
+        if item.id[1] == "k":
+            item.get_moves()
+
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
-
+        
+    piece_group.update(events) #to check for clicks...
     piece_group.draw(screen)
 
     pygame.display.flip()
