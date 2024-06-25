@@ -12,60 +12,127 @@ class Piece(pygame.sprite.Sprite):
         self.image = image
         self.color = self.id[0]
         self.has_moved = False
-        self.moves = []
 
         if self.color == "b":
             self.color_str = "black"
         else:
             self.color_str = "white"
+
         self.image = f"{self.color_str}{self.image}.png"
         self.image = pygame.image.load(f"{self.image}")
         self.image = pygame.transform.scale(self.image, (150, 150))
         self.rect = self.image.get_rect()
 
-    def remove_invalid(self):
+    def remove_invalid(self, board):
+        targeted_removal = []
+        for move in range(len(self.moves)):
+            move = self.moves[move - 1]
+            if move[1] > 7 or move[2] > 7 or move[1] < 0 or move[2] < 0: #if outside of the board
+
+                targeted_removal.append(move)
+
+            else:
+                tempy = move[1]
+                tempx = move[2]
+
+                if board[tempy, tempx] != '0': #if space is not empty, consider making it invalid
+                    temp = board[tempy, tempx]
+                    #print(temp[0])
+                    if temp[0] == self.color: #if space contains a piece of the same color, remove!
+                        targeted_removal.append(move)
+                        
+        for move in targeted_removal:
+            self.moves.remove(move)
+
+
+    def add_moves(self, black_moves, white_moves):
         for move in self.moves:
-            if move[0] > 7 or move[1] > 7 or move[0] < 0 or move[1] < 0: #if outside of the board
-                self.moves.pop(move)
-    
+                if move in black_moves:
+                    self.moves.remove(move)
+                else:
+                    if self.color == "b":
+                        black_moves.append(move)
+                    else:
+                        white_moves.append(move)
+
+
     def check_horizontal(self, board): #check if there is nothing inbetween the piece and its destination, for rooks, queens
         cursor_x = self.x #for checking valid tiles
         cursor_y = self.y
 
-        while cursor_x < 8: #right
+        while cursor_x < 7: #right
             cursor_x += 1
-            if board[self.y, cursor_x] == '':
+            if board[self.y, cursor_x] == '0':
                 self.moves.append(board[self.y, cursor_x])
             else:
                 break
         cursor_x = self.x
-        while cursor_x > -1: #left
+        while cursor_x > 0: #left
             cursor_x -= 1
-            if board[self.y, cursor_x] == '':
+            if board[self.y, cursor_x] == '0':
                 self.moves.append(board[self.y, cursor_x])
             else:
                 break
 
-        while cursor_y > -1: #down
+        while cursor_y > 0: #down
             cursor_y -= 1
-            if board[cursor_y, self.x] == '':
+            if board[cursor_y, self.x] == '0':
                 self.moves.append(board[cursor_y, self.x])
             else:
                 break
         cursor_y = self.y
-        while cursor_x < 8: #up
+        while cursor_x < 7: #up
             cursor_x += 1
-            if board[cursor_y, self.x] == '':
+            if board[cursor_y, self.x] == '0':
                 self.moves.append(board[cursor_y, self.x])
             else:
                 break
     
-    def check_diagonal(self): #for bishops and queens
+    def check_diagonal(self, board): #for bishops and queens
         
         cursor_x = self.x
         cursor_y = self.y
 
-        #while cursor_x < 8 and cursor_y < 8: #top right
+        while cursor_x < 7 and cursor_y < 7: #top right
+            cursor_x += 1
+            cursor_y += 1
+            if board[cursor_y, cursor_x] == '0':
+                self.moves.append(board[cursor_y, self.x])
+            else:
+                break
+
+        cursor_x = self.x
+        cursor_y = self.y
+
+        while cursor_x > 0 and cursor_y < 7: #top left
+            cursor_x -= 1
+            cursor_y += 1
+            if board[cursor_y, cursor_x] == '0':
+                self.moves.append(board[cursor_y, self.x])
+            else:
+                break
+        cursor_x = self.x
+        cursor_y = self.y
+
+        while cursor_x > 0 and cursor_y > 0: #bottom left
+            cursor_x -= 1
+            cursor_y -= 1
+            if board[cursor_y, cursor_x] == '0':
+                self.moves.append(board[cursor_y, self.x])
+            else:
+                break
+        cursor_x = self.x
+        cursor_y = self.y
+
+        while cursor_x < 7 and cursor_y > 0: #bottom right
+            cursor_x += 1
+            cursor_y -= 1
+            if board[cursor_y, cursor_x] == '0':
+                self.moves.append(board[cursor_y, self.x])
+            else:
+                break
+        cursor_x = self.x
+        cursor_y = self.y
             
 
     def __repr__(self):
@@ -85,13 +152,11 @@ class Piece(pygame.sprite.Sprite):
 
     def get_moves(self): #decoy function so that it can be overridden by child class?
         pass
-    def update(self, events):
+    
+    def update(self, events, turn):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
-                    #moving_x = (event.pos[0])
-                    #moving_y = (event.pos[1])
-
-                    #self.rect.x = moving_x
-                    #self.rect.y = moving_y
-                    self.get_moves()
+                    if turn == self.color:
+                        print(self.id)
+                        chosen_piece = self.id
