@@ -1,10 +1,10 @@
 import numpy
-from Piece import Piece
+from Piece import Piece, get_selected
 
 class King(Piece): #inherits the piece class
-    def get_moves(self, board, white_moves, black_moves):
+    def get_moves(self, board, white_moves, black_moves, pieces):
         self.moves = []
-        '''
+        
         if self.has_moved == False: #castling
 
             if pieces[f"{self.color}r1"].has_moved == False: #castling to the left
@@ -30,7 +30,7 @@ class King(Piece): #inherits the piece class
                         if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x + 2)] not in black_moves: #if not moving through check
                             self.moves.append([self.y, (self.x + 2)])
                             #print("right white castle")
-        '''
+        
         
         self.moves.append([self.id, (self.y + 1), (self.x)]) #move down
         self.moves.append([self.id, (self.y - 1), (self.x)]) #move up

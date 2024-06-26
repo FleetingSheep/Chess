@@ -2,7 +2,7 @@
 import pygame
 import numpy
 from Board import draw_board
-from Piece import Piece
+from Piece import Piece, get_selected
 from Pawn import Pawn
 from Rook import Rook
 from Queen import Queen
@@ -28,7 +28,23 @@ clock = pygame.time.Clock()
 
 white_moves = [] #to check valid king moves and determine if there is checkmate
 black_moves = []
-        
+
+red = pygame.Color(255, 0, 0)       
+
+class Highlighter(pygame.sprite.Sprite):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = f"highlight.png"
+        self.image = pygame.image.load(f"{self.image}")
+        self.image = pygame.transform.scale(self.image, (160, 160))
+        self.rect = self.image.get_rect()
+    
+
+    def move(self, id):
+        piece = pieces[id]
+        self.rect.x = piece.get_x()
+        self.rect.y = piece.get_y()
 
 def setup_board(board_size): #place pieces
     global board
@@ -90,8 +106,6 @@ def setup_board(board_size): #place pieces
                 x.move_to_start()
                 pieces[x.id] = x
 
-    print(board)
-
 screen.fill("white")
 setup_board(8)
 draw_board(window_height, window_width, 8, screen)
@@ -102,7 +116,19 @@ counter = 1 #REMOVE
 
 pending_move = True #waiting for move, don't recalculate moves unless one has actually been made!
 turn = "w"
+
+highlighter = Highlighter()
+highlight_group = pygame.sprite.Group()
+pygame.sprite.Group.add(highlight_group, highlighter)
+
+piece_selected = True
+
 while True:
+
+    screen.fill("white")
+    setup_board(8)
+    draw_board(window_height, window_width, 8, screen)
+
     if pending_move == True:
         white_moves = [] #to check valid king moves and determine if there is checkmate
         black_moves = []
@@ -114,7 +140,7 @@ while True:
 
         for item in pieces.values():
             if item.id[1] == "k":
-                item.get_moves(board, white_moves, black_moves)
+                item.get_moves(board, white_moves, black_moves, pieces)
     '''
     if counter == 1:
         print(f"white moves: {white_moves}")
@@ -128,8 +154,38 @@ while True:
             pygame.quit()
             raise SystemExit
         
-    piece_group.update(events) #to check for clicks...
+        if event.type == pygame.MOUSEBUTTONDOWN:
+
+            if piece_selected[0] == True:
+                piece = pieces[piece_selected[1]] #grab class object for piece
+                x = int(event.pos[0] / 160)
+                y = int(event.pos[1] / 160)
+                
+                for move in piece.moves:
+
+                    if move[1] == y and move[2] == x: #if the cursor clicks on the correct tile for a move
+
+                        if board[x, y] != '0': # capture a piece?
+                            captured_piece = pieces[board[x, y]]
+                            pieces.pop(captured_piece.id)
+                            pygame.sprite.Group.remove(piece_group, captured_piece)
+
+                        board[piece.y, piece.x] = '0' #make sure the piece leaves behind an empty space
+                        board[x, y] = piece.id
+                        piece.x = x
+                        piece.y = y
+
+                        piece_selected[0] = False
+                    
+        
+    piece_group.update(events, turn) #to check for clicks...
     piece_group.draw(screen)
+    piece_selected = get_selected()
+
+    if piece_selected[0] == True:
+        highlighter.move(piece_selected[1])
+        highlight_group.update(events)
+        highlight_group.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)

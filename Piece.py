@@ -1,5 +1,6 @@
 import pygame
-
+piece_selected = False
+chosen_piece = None
 class Piece(pygame.sprite.Sprite):
 
     def __init__(self, id, pos, image):
@@ -12,6 +13,7 @@ class Piece(pygame.sprite.Sprite):
         self.image = image
         self.color = self.id[0]
         self.has_moved = False
+        self.selected = False
 
         if self.color == "b":
             self.color_str = "black"
@@ -137,15 +139,13 @@ class Piece(pygame.sprite.Sprite):
 
     def __repr__(self):
         return f"ID: {self.id}, POS: {self.pos}"
-    
-    def get_captured(self):
-        #pieces.pop(self.id)
-        pass
+        
 
     def get_x(self):
         return (self.x * 160) + 3
     def get_y(self):
         return (self.y * 160)
+    
     def move_to_start(self):
         self.rect.x = (160 * self.x) + 3
         self.rect.y = 160 * self.y
@@ -154,9 +154,20 @@ class Piece(pygame.sprite.Sprite):
         pass
     
     def update(self, events, turn):
+        global piece_selected, chosen_piece
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
                     if turn == self.color:
-                        print(self.id)
-                        chosen_piece = self.id
+                        if piece_selected == False:
+                            if self.moves != []:
+                                print(self.id)
+                                chosen_piece = self.id
+                                self.selected = True
+                                piece_selected = True
+
+                    
+def get_selected():
+    global piece_selected, chosen_piece
+    temp = [piece_selected, chosen_piece]
+    return temp
