@@ -2,9 +2,8 @@ from Queen import Queen
 from Piece import Piece
 import numpy
 class Pawn(Piece):
-
+    
     def get_moves(self, board, white_moves, black_moves):
-        global most_recent
         self.moves = []
         if self.has_moved == False: #can jump two spaces?
             if self.color == "b":
@@ -16,7 +15,8 @@ class Pawn(Piece):
 
 
         if self.color == "b":
-            self.moves.append([self.id, (self.y + 1), (self.x)]) #black pawns
+            if board[self.y + 1, self.x] == '0':
+                self.moves.append([self.id, (self.y + 1), (self.x)]) #black pawns
 
             try:
                 target = board[(self.y + 1), (self.x - 1)]
@@ -38,11 +38,12 @@ class Pawn(Piece):
 
             
         else: #WHITE PIECES
-            self.moves.append([self.id, (self.y - 1), (self.x)]) #white pawns
+            if board[self.y - 1, self.x] == '0':
+                self.moves.append([self.id, (self.y - 1), (self.x)]) #white pawns
 
             try:
                 target = board[(self.y - 1), (self.x - 1)]
-                if target != '0' : #if capturable piece in bottom LEFT
+                if target != '0' : #if capturable piece in top LEFT
                     if target[0] != self.color: #if the piece is not your own, it can be captured
                         self.moves.append([self.id, (self.y - 1), (self.x - 1)])
                     
@@ -51,15 +52,15 @@ class Pawn(Piece):
 
             try:
                 target = board[(self.y - 1), (self.x + 1)] #if capturable piece in bottom RIGHT
-                if target != '0' : #if capturable piece in bottom left
+                if target != '0' : #if capturable piece in top right
                     if target[0] != self.color: #if the piece is not your own, it can be captured
                         self.moves.append([self.id, (self.y - 1), (self.x + 1)])
                     
             except:
                 pass
 
+    
         
-
         try:#EN PASSANT FUNCTIONALITY
             to_left = board[self.y, (self.x - 1)]
         except:
@@ -89,7 +90,7 @@ class Pawn(Piece):
                         self.moves.append([self.id], (self.y - 1), (self.x + 1))
         except:
             pass
-
+        
         self.remove_invalid(board)
         self.add_moves(black_moves, white_moves)
 

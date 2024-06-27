@@ -5,7 +5,6 @@ def draw_board(window_height, window_width, board_size, screen):#draw bg tiles
     altwhite = pygame.Color(249, 214, 177)
     tile_height = window_height // board_size
     tile_width = window_width // board_size
-
     counter = 0 #move down one tile after filling all 8 in a horizontal row
     offset = False #create checkered pattern by starting with either black or white
 

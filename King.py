@@ -7,30 +7,33 @@ class King(Piece): #inherits the piece class
         
         if self.has_moved == False: #castling
 
-            if pieces[f"{self.color}r1"].has_moved == False: #castling to the left
-                if board[self.y, (self.x - 1)] == '' and board[self.y, (self.x - 2)] == '' and board[self.y, (self.x - 3) == '']: #if space uninterrupted
+            try:
+                if pieces[f"{self.color}r1"].has_moved == False: #castling to the left
+                    print(self.y, self.x)
+                    if board[self.y, (self.x - 1)] == '0' and board[self.y, (self.x - 2)] == '0': #if space uninterrupted
 
-                    if self.color == "b":
-                        if board[self.y, (self.x - 1)] not in white_moves and board[self.y, (self.x - 2)] not in white_moves and board[self.y, (self.x - 3)] not in white_moves: #if not moving through check
-                           self.moves.append([self.y, (self.x - 3)])
-                           #print("left black castle")
-                    else:
-                        if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x - 2)] not in black_moves and board[self.y, (self.x - 3)] not in black_moves: #if not moving through check
-                            self.moves.append([self.y, (self.x - 3)])
-                            #print("left white castle")
+                        if self.color == "b":
+                            if board[self.y, (self.x - 1)] not in white_moves and board[self.y, (self.x - 2)] not in white_moves and board[self.y, (self.x - 3)] not in white_moves: #if not moving through check
+                               self.moves.append([self.id, self.y, (self.x - 2)])
+                               print("left black castle")
+                        else:
+                            if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x - 2)] not in black_moves and board[self.y, (self.x - 3)] not in black_moves: #if not moving through check
+                                self.moves.append([self.id, self.y, (self.x - 2)])
+                                print("left white castle")
 
-            if pieces[f"{self.color}r2"].has_moved == False: #castling to the right
-                if board[self.y, (self.x + 1)] == '' and board[self.y, (self.x + 2)] == '': #if space uninterrupted
+                if pieces[f"{self.color}r2"].has_moved == False: #castling to the right
+                    if board[self.y, (self.x + 1)] == '0' and board[self.y, (self.x + 2)] == '0': #if space uninterrupted
 
-                    if self.color == "b":
-                        if board[self.y, (self.x + 1)] not in white_moves and board[self.y, (self.x + 2)] not in white_moves: #if not moving through check
-                           self.moves.append([self.y, (self.x + 2)])
-                           #print("right black castle")
-                    else:
-                        if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x + 2)] not in black_moves: #if not moving through check
-                            self.moves.append([self.y, (self.x + 2)])
-                            #print("right white castle")
-        
+                        if self.color == "b":
+                            if board[self.y, (self.x + 1)] not in white_moves and board[self.y, (self.x + 2)] not in white_moves: #if not moving through check
+                               self.moves.append([self.id, self.y, (self.x + 2)])
+                               print("right black castle")
+                        else:
+                            if board[self.y, (self.x + 1)] not in black_moves and board[self.y, (self.x + 2)] not in black_moves: #if not moving through check
+                                self.moves.append([self.id, self.y, (self.x + 2)])
+                                print("right white castle")
+            except:
+                pass
         
         self.moves.append([self.id, (self.y + 1), (self.x)]) #move down
         self.moves.append([self.id, (self.y - 1), (self.x)]) #move up

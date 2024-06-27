@@ -1,5 +1,5 @@
 import pygame
-piece_selected = False
+is_piece_selected = False
 chosen_piece = None
 class Piece(pygame.sprite.Sprite):
 
@@ -14,6 +14,7 @@ class Piece(pygame.sprite.Sprite):
         self.color = self.id[0]
         self.has_moved = False
         self.selected = False
+        self.en_passant = False
 
         if self.color == "b":
             self.color_str = "black"
@@ -29,19 +30,22 @@ class Piece(pygame.sprite.Sprite):
         targeted_removal = []
         for move in range(len(self.moves)):
             move = self.moves[move - 1]
-            if move[1] > 7 or move[2] > 7 or move[1] < 0 or move[2] < 0: #if outside of the board
+            try:
+                if move[1] > 7 or move[2] > 7 or move[1] < 0 or move[2] < 0: #if outside of the board
 
+                    targeted_removal.append(move)
+
+                else:
+                    tempy = move[1]
+                    tempx = move[2]
+
+                    if board[tempy, tempx] != '0': #if space is not empty, consider making it invalid
+                        temp = board[tempy, tempx]
+                        #print(temp[0])
+                        if temp[0] == self.color: #if space contains a piece of the same color, remove!
+                            targeted_removal.append(move)
+            except:
                 targeted_removal.append(move)
-
-            else:
-                tempy = move[1]
-                tempx = move[2]
-
-                if board[tempy, tempx] != '0': #if space is not empty, consider making it invalid
-                    temp = board[tempy, tempx]
-                    #print(temp[0])
-                    if temp[0] == self.color: #if space contains a piece of the same color, remove!
-                        targeted_removal.append(move)
                         
         for move in targeted_removal:
             self.moves.remove(move)
@@ -65,43 +69,65 @@ class Piece(pygame.sprite.Sprite):
         while cursor_x < 7: #right
             cursor_x += 1
             if board[self.y, cursor_x] == '0':
-                self.moves.append(board[self.y, cursor_x])
+                self.moves.append([self.id, self.y, cursor_x])
             else:
-                break
+                temp = board[self.y, cursor_x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, self.y, cursor_x])
+                else:
+                    break
         cursor_x = self.x
+
         while cursor_x > 0: #left
             cursor_x -= 1
             if board[self.y, cursor_x] == '0':
-                self.moves.append(board[self.y, cursor_x])
+                self.moves.append([self.id, self.y, cursor_x])
             else:
-                break
-
-        while cursor_y > 0: #down
+                temp = board[self.y, cursor_x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, self.y, cursor_x])
+                else:
+                    break
+        
+        while cursor_y > 0: #up
             cursor_y -= 1
             if board[cursor_y, self.x] == '0':
-                self.moves.append(board[cursor_y, self.x])
+                self.moves.append([self.id, cursor_y, self.x])
             else:
-                break
+                temp = board[cursor_y, self.x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, cursor_y, self.x])
+                else:
+                    break
+
         cursor_y = self.y
-        while cursor_x < 7: #up
-            cursor_x += 1
+        while cursor_y < 7: #down
+            cursor_y += 1
             if board[cursor_y, self.x] == '0':
-                self.moves.append(board[cursor_y, self.x])
+                self.moves.append([self.id, cursor_y, self.x])
             else:
-                break
+                temp = board[cursor_y, self.x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, cursor_y, self.x])
+                else:
+                    break
     
     def check_diagonal(self, board): #for bishops and queens
         
         cursor_x = self.x
         cursor_y = self.y
 
-        while cursor_x < 7 and cursor_y < 7: #top right
+        while cursor_x < 7 and cursor_y < 7: #bottom right
             cursor_x += 1
             cursor_y += 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append(board[cursor_y, self.x])
+                self.moves.append([self.id, cursor_y, cursor_x])
             else:
-                break
+                temp = board[cursor_y, cursor_x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, cursor_y, cursor_x])
+                else:
+                    break
 
         cursor_x = self.x
         cursor_y = self.y
@@ -110,9 +136,13 @@ class Piece(pygame.sprite.Sprite):
             cursor_x -= 1
             cursor_y += 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append(board[cursor_y, self.x])
+                self.moves.append([self.id, cursor_y, cursor_x])
             else:
-                break
+                temp = board[cursor_y, cursor_x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, cursor_y, cursor_x])
+                else:
+                    break
         cursor_x = self.x
         cursor_y = self.y
 
@@ -120,9 +150,13 @@ class Piece(pygame.sprite.Sprite):
             cursor_x -= 1
             cursor_y -= 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append(board[cursor_y, self.x])
+                self.moves.append([self.id, cursor_y, cursor_x])
             else:
-                break
+                temp = board[cursor_y, cursor_x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, cursor_y, cursor_x])
+                else:
+                    break
         cursor_x = self.x
         cursor_y = self.y
 
@@ -130,9 +164,13 @@ class Piece(pygame.sprite.Sprite):
             cursor_x += 1
             cursor_y -= 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append(board[cursor_y, self.x])
+                self.moves.append([self.id, cursor_y, cursor_x])
             else:
-                break
+                temp = board[cursor_y, cursor_x]
+                if temp[0] != self.color:
+                    self.moves.append([self.id, cursor_y, cursor_x])
+                else:
+                    break
         cursor_x = self.x
         cursor_y = self.y
             
@@ -153,21 +191,27 @@ class Piece(pygame.sprite.Sprite):
     def get_moves(self): #decoy function so that it can be overridden by child class?
         pass
     
-    def update(self, events, turn):
-        global piece_selected, chosen_piece
+    def update(self, events, turn, highlighter):
+        global is_piece_selected, chosen_piece
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
                     if turn == self.color:
-                        if piece_selected == False:
+                        if is_piece_selected == False:
                             if self.moves != []:
-                                print(self.id)
+                                #print(self.id)
                                 chosen_piece = self.id
                                 self.selected = True
-                                piece_selected = True
+                                is_piece_selected = True
+                                highlighter.move(chosen_piece)
+                        
 
                     
 def get_selected():
-    global piece_selected, chosen_piece
-    temp = [piece_selected, chosen_piece]
-    return temp
+    global is_piece_selected, chosen_piece
+    piece_selected = [is_piece_selected, chosen_piece]
+    return piece_selected
+
+def turn_false():
+    global is_piece_selected
+    is_piece_selected = False
