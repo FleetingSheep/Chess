@@ -6,5 +6,5 @@ class Rook(Piece):
         self.moves = []
 
         self.check_horizontal(board)
-        self.remove_invalid(board)
+        self.remove_invalid(board, white_moves, black_moves, pieces)
         self.add_moves(black_moves, white_moves)

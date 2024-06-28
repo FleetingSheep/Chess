@@ -26,18 +26,18 @@ class Piece(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (150, 150))
         self.rect = self.image.get_rect()
 
-    def remove_invalid(self, board):
+    def remove_invalid(self, board, white_moves, black_moves, pieces):
         targeted_removal = []
         for move in range(len(self.moves)):
             move = self.moves[move - 1]
             try:
-                if move[1] > 7 or move[2] > 7 or move[1] < 0 or move[2] < 0: #if outside of the board
+                if move[0] > 7 or move[1] > 7 or move[0] < 0 or move[1] < 0: #if outside of the board
 
                     targeted_removal.append(move)
 
                 else:
-                    tempy = move[1]
-                    tempx = move[2]
+                    tempy = move[0]
+                    tempx = move[1]
 
                     if board[tempy, tempx] != '0': #if space is not empty, consider making it invalid
                         temp = board[tempy, tempx]
@@ -46,10 +46,41 @@ class Piece(pygame.sprite.Sprite):
                             targeted_removal.append(move)
             except:
                 targeted_removal.append(move)
-                        
+        
         for move in targeted_removal:
             self.moves.remove(move)
 
+
+    '''
+        targeted_removal = []
+        for move in range(len(self.moves)):
+
+            future = board #simulate the move the player is making, and ensure it does not put the king in check
+            future[self.y, self.x] = '0' #make sure the piece leaves behind an empty space
+
+            move = self.moves[move - 1]
+
+            future[move[1], move[2]] = self.id
+
+            for item in pieces.values():
+                if item.id[1] != "k": #ignore king moves at first so we can check theirs later (so they dont move into check)
+                    item.get_moves(future, white_moves, black_moves, pieces)
+                if item.id[1] == "k":
+                    item.get_moves(future, white_moves, black_moves, pieces)
+
+
+            if self.color== "b": #if black's turn, make sure whatever they did didn't reveal the king
+                king = pieces["wk"]
+                if [king.y, king.x] in white_moves:
+                    targeted_removal.append(move)
+            else:
+                king = pieces["bk"]
+                if [king.y, king.x] in black_moves:
+                    targeted_removal.append(move)
+
+        for move in targeted_removal:
+            self.moves.remove(move)
+    '''
 
     def add_moves(self, black_moves, white_moves):
         for move in self.moves:
@@ -69,11 +100,11 @@ class Piece(pygame.sprite.Sprite):
         while cursor_x < 7: #right
             cursor_x += 1
             if board[self.y, cursor_x] == '0':
-                self.moves.append([self.id, self.y, cursor_x])
+                self.moves.append([self.y, cursor_x])
             else:
                 temp = board[self.y, cursor_x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, self.y, cursor_x])
+                    self.moves.append([self.y, cursor_x])
                 else:
                     break
         cursor_x = self.x
@@ -81,22 +112,22 @@ class Piece(pygame.sprite.Sprite):
         while cursor_x > 0: #left
             cursor_x -= 1
             if board[self.y, cursor_x] == '0':
-                self.moves.append([self.id, self.y, cursor_x])
+                self.moves.append([self.y, cursor_x])
             else:
                 temp = board[self.y, cursor_x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, self.y, cursor_x])
+                    self.moves.append([self.y, cursor_x])
                 else:
                     break
         
         while cursor_y > 0: #up
             cursor_y -= 1
             if board[cursor_y, self.x] == '0':
-                self.moves.append([self.id, cursor_y, self.x])
+                self.moves.append([cursor_y, self.x])
             else:
                 temp = board[cursor_y, self.x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, cursor_y, self.x])
+                    self.moves.append([cursor_y, self.x])
                 else:
                     break
 
@@ -104,11 +135,11 @@ class Piece(pygame.sprite.Sprite):
         while cursor_y < 7: #down
             cursor_y += 1
             if board[cursor_y, self.x] == '0':
-                self.moves.append([self.id, cursor_y, self.x])
+                self.moves.append([cursor_y, self.x])
             else:
                 temp = board[cursor_y, self.x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, cursor_y, self.x])
+                    self.moves.append([cursor_y, self.x])
                 else:
                     break
     
@@ -121,11 +152,11 @@ class Piece(pygame.sprite.Sprite):
             cursor_x += 1
             cursor_y += 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append([self.id, cursor_y, cursor_x])
+                self.moves.append([cursor_y, cursor_x])
             else:
                 temp = board[cursor_y, cursor_x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, cursor_y, cursor_x])
+                    self.moves.append([cursor_y, cursor_x])
                 else:
                     break
 
@@ -136,11 +167,11 @@ class Piece(pygame.sprite.Sprite):
             cursor_x -= 1
             cursor_y += 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append([self.id, cursor_y, cursor_x])
+                self.moves.append([cursor_y, cursor_x])
             else:
                 temp = board[cursor_y, cursor_x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, cursor_y, cursor_x])
+                    self.moves.append([cursor_y, cursor_x])
                 else:
                     break
         cursor_x = self.x
@@ -150,11 +181,11 @@ class Piece(pygame.sprite.Sprite):
             cursor_x -= 1
             cursor_y -= 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append([self.id, cursor_y, cursor_x])
+                self.moves.append([cursor_y, cursor_x])
             else:
                 temp = board[cursor_y, cursor_x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, cursor_y, cursor_x])
+                    self.moves.append([cursor_y, cursor_x])
                 else:
                     break
         cursor_x = self.x
@@ -164,11 +195,11 @@ class Piece(pygame.sprite.Sprite):
             cursor_x += 1
             cursor_y -= 1
             if board[cursor_y, cursor_x] == '0':
-                self.moves.append([self.id, cursor_y, cursor_x])
+                self.moves.append([cursor_y, cursor_x])
             else:
                 temp = board[cursor_y, cursor_x]
                 if temp[0] != self.color:
-                    self.moves.append([self.id, cursor_y, cursor_x])
+                    self.moves.append([cursor_y, cursor_x])
                 else:
                     break
         cursor_x = self.x

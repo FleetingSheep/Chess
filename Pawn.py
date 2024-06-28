@@ -7,22 +7,22 @@ class Pawn(Piece):
         self.moves = []
         if self.has_moved == False: #can jump two spaces?
             if self.color == "b":
-                self.moves.append([self.id, (self.y + 2), (self.x)]) #move down, for black pawns
+                self.moves.append([(self.y + 2), (self.x)]) #move down, for black pawns
 
             else:
-                self.moves.append([self.id, (self.y - 2), (self.x)]) #white pawns
+                self.moves.append([(self.y - 2), (self.x)]) #white pawns
         
 
 
         if self.color == "b":
             if board[self.y + 1, self.x] == '0':
-                self.moves.append([self.id, (self.y + 1), (self.x)]) #black pawns
+                self.moves.append([(self.y + 1), (self.x)]) #black pawns
 
             try:
                 target = board[(self.y + 1), (self.x - 1)]
                 if target != '0' : #if capturable piece in bottom LEFT
                     if target[0] != self.color: #if the piece is not your own, it can be captured
-                        self.moves.append([self.id, (self.y + 1), (self.x - 1)])
+                        self.moves.append([(self.y + 1), (self.x - 1)])
                     
             except:
                 pass
@@ -31,7 +31,7 @@ class Pawn(Piece):
                 target = board[(self.y + 1), (self.x + 1)] #if capturable piece in bottom RIGHT
                 if target != '0' : #if capturable piece in bottom left
                     if target[0] != self.color: #if the piece is not your own, it can be captured
-                        self.moves.append([self.id, (self.y + 1), (self.x + 1)])
+                        self.moves.append([(self.y + 1), (self.x + 1)])
                     
             except:
                 pass
@@ -39,13 +39,13 @@ class Pawn(Piece):
             
         else: #WHITE PIECES
             if board[self.y - 1, self.x] == '0':
-                self.moves.append([self.id, (self.y - 1), (self.x)]) #white pawns
+                self.moves.append([(self.y - 1), (self.x)]) #white pawns
 
             try:
                 target = board[(self.y - 1), (self.x - 1)]
                 if target != '0' : #if capturable piece in top LEFT
                     if target[0] != self.color: #if the piece is not your own, it can be captured
-                        self.moves.append([self.id, (self.y - 1), (self.x - 1)])
+                        self.moves.append([(self.y - 1), (self.x - 1)])
                     
             except:
                 pass
@@ -54,7 +54,7 @@ class Pawn(Piece):
                 target = board[(self.y - 1), (self.x + 1)] #if capturable piece in bottom RIGHT
                 if target != '0' : #if capturable piece in top right
                     if target[0] != self.color: #if the piece is not your own, it can be captured
-                        self.moves.append([self.id, (self.y - 1), (self.x + 1)])
+                        self.moves.append([(self.y - 1), (self.x + 1)])
                     
             except:
                 pass
@@ -75,7 +75,7 @@ class Pawn(Piece):
             if to_left[1] == "p":
                 if pieces[to_left].en_passant == True:
                     if self.color == "b": #black pawn
-                        self.moves.append([self.id, (self.y + 1), (self.x - 1)])
+                        self.moves.append([(self.y + 1), (self.x - 1)])
                     else:
                         self.moves.append([[self.id], (self.y - 1), (self.x - 1)])
         except:
@@ -85,13 +85,13 @@ class Pawn(Piece):
             if to_right[1] == "p":
                 if pieces[to_right].en_passant == True:
                     if self.color == "b": #black pawn
-                        self.moves.append([self.id, (self.y + 1), (self.x + 1)])
+                        self.moves.append([(self.y + 1), (self.x + 1)])
                     else:
-                        self.moves.append([self.id, (self.y - 1), (self.x + 1)])
+                        self.moves.append([(self.y - 1), (self.x + 1)])
         except:
             pass
         
-        self.remove_invalid(board)
+        self.remove_invalid(board, white_moves, black_moves, pieces)
         self.add_moves(black_moves, white_moves)
 
 

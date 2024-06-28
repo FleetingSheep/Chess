@@ -147,12 +147,7 @@ while True:
                 
                 for move in piece.moves:
 
-                    if move[1] == y and move[2] == x: #if the cursor clicks on the correct tile for a move
-
-
-
-                        future_array = board #simulate the move the player is making, and ensure it does not put the king in check
-
+                    if move[0] == y and move[1] == x: #if the cursor clicks on the correct tile for a move
 
                         if board[y, x] != '0': # capture a piece?
 
