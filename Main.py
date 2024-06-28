@@ -127,7 +127,7 @@ while True:
 
         for item in pieces.values():
             if item.id[1] != "k": #ignore king moves at first so we can check theirs later (so they dont move into check)
-                item.get_moves(board, white_moves, black_moves)
+                item.get_moves(board, white_moves, black_moves, pieces)
             if item.id[1] == "k":
                 item.get_moves(board, white_moves, black_moves, pieces)
 
@@ -140,7 +140,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             #print(if_piece_selected)
             if if_piece_selected == True:
-                print("RUNNING FUNCTION!!")
+
                 piece = pieces[piece_selected[1]] #grab class object for piece
                 x = int(event.pos[0] / 160)
                 y = int(event.pos[1] / 160)
@@ -148,12 +148,28 @@ while True:
                 for move in piece.moves:
 
                     if move[1] == y and move[2] == x: #if the cursor clicks on the correct tile for a move
-                        print("CORRECT TILE!")
+
+
+
+                        future_array = board #simulate the move the player is making, and ensure it does not put the king in check
+
+
                         if board[y, x] != '0': # capture a piece?
-                            print("DELETING PIECE!")
+
                             captured_piece = pieces[board[y, x]]
                             pieces.pop(captured_piece.id)
                             pygame.sprite.Group.remove(piece_group, captured_piece)
+
+                        if piece.id[1] == "p": #if pawn
+                            if board[y, x] == '0': #if space empty
+                                if abs(piece.x - x) == 1 and abs(piece.y - y) == 1: #if the pawn moved diagonally one space, but did not take anything!
+
+                                    if piece.color == "b":
+                                        captured_piece = pieces[board[(y - 1), x]]
+                                    else:
+                                        captured_piece = pieces[board[(y + 1), x]]
+                                    pieces.pop(captured_piece.id)
+                                    pygame.sprite.Group.remove(piece_group, captured_piece)
 
                         board[piece.y, piece.x] = '0' #make sure the piece leaves behind an empty space
                         board[y, x] = piece.id
@@ -176,18 +192,11 @@ while True:
                                 rook_y = chosen_rook.get_y()
                                 chosen_rook.rect.x = rook_x
                                 chosen_rook.rect.y = rook_y
-                                
-
-                        if piece.id[1] == "p":
-                            if abs(piece.y - y) > 1: #if the move was a double jump from the pawn, enable en passant
-                                piece.en_passant = True
-                            else:
-                                pass
-                             
-
 
                         piece.x = x
                         piece.y = y
+
+                        
 
                         x = piece.get_x()
                         y = piece.get_y()
@@ -203,6 +212,15 @@ while True:
                         turn_false()
                         print(board)
                         piece.has_moved = True
+
+                        for chosen_piece in pieces.values(): #after a move has passed, make sure en passant doesnt trigger, unless the most recent move was a double jump by that pawn
+                            chosen_piece.en_passant = False
+
+                        if piece.id[1] == "p":
+                            if abs(piece.y - y) > 1: #if the move was a double jump from the pawn, enable en passant
+                                piece.en_passant = True
+                            else:
+                                pass
 
     screen.fill(red)
     draw_board(window_height, window_width, 8, screen)

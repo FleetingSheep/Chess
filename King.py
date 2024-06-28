@@ -9,17 +9,16 @@ class King(Piece): #inherits the piece class
 
             try:
                 if pieces[f"{self.color}r1"].has_moved == False: #castling to the left
-                    print(self.y, self.x)
                     if board[self.y, (self.x - 1)] == '0' and board[self.y, (self.x - 2)] == '0': #if space uninterrupted
 
                         if self.color == "b":
                             if board[self.y, (self.x - 1)] not in white_moves and board[self.y, (self.x - 2)] not in white_moves and board[self.y, (self.x - 3)] not in white_moves: #if not moving through check
                                self.moves.append([self.id, self.y, (self.x - 2)])
-                               print("left black castle")
+
                         else:
                             if board[self.y, (self.x - 1)] not in black_moves and board[self.y, (self.x - 2)] not in black_moves and board[self.y, (self.x - 3)] not in black_moves: #if not moving through check
                                 self.moves.append([self.id, self.y, (self.x - 2)])
-                                print("left white castle")
+
 
                 if pieces[f"{self.color}r2"].has_moved == False: #castling to the right
                     if board[self.y, (self.x + 1)] == '0' and board[self.y, (self.x + 2)] == '0': #if space uninterrupted
@@ -27,11 +26,11 @@ class King(Piece): #inherits the piece class
                         if self.color == "b":
                             if board[self.y, (self.x + 1)] not in white_moves and board[self.y, (self.x + 2)] not in white_moves: #if not moving through check
                                self.moves.append([self.id, self.y, (self.x + 2)])
-                               print("right black castle")
+
                         else:
                             if board[self.y, (self.x + 1)] not in black_moves and board[self.y, (self.x + 2)] not in black_moves: #if not moving through check
                                 self.moves.append([self.id, self.y, (self.x + 2)])
-                                print("right white castle")
+
             except:
                 pass
         
@@ -46,17 +45,27 @@ class King(Piece): #inherits the piece class
 
         self.remove_invalid(board)
 
+
         if self.color == "b": #black king
             for move in self.moves:
                 if move in white_moves:
-                    self.moves.remove(move)
+                    self.moves.remove(move) 
                 else:
                     black_moves.append(move)
-    
+
+            self.add_moves(black_moves, white_moves)
             if black_moves == [] and self.moves == []: #if no moves available, aka checkmate
-                pass #end game
+                print("Checkmate! White wins.")
 
         else: #white king
+            
+            for move in self.moves:
+                if move in black_moves:
+                    self.moves.remove(move)
+                else:
+                    white_moves.append(move)
             self.add_moves(black_moves, white_moves)
             if white_moves == [] and self.moves == []:
-                pass #end game
+                print("Checkmate! Black wins.")
+
+            

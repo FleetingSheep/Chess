@@ -3,7 +3,7 @@ from Piece import Piece
 import numpy
 class Pawn(Piece):
     
-    def get_moves(self, board, white_moves, black_moves):
+    def get_moves(self, board, white_moves, black_moves, pieces):
         self.moves = []
         if self.has_moved == False: #can jump two spaces?
             if self.color == "b":
@@ -66,28 +66,28 @@ class Pawn(Piece):
         except:
             pass
         try:
-            to_right = board[self.y, (self.x - 1)]
+            to_right = board[self.y, (self.x + 1)]
         except:
             pass
 
         #EN PASSANT FUNCTIONALITY
         try:
             if to_left[1] == "p":
-                if to_left.en_passant == True:
+                if pieces[to_left].en_passant == True:
                     if self.color == "b": #black pawn
-                        self.moves.append([self.id], (self.y + 1), (self.x - 1))
+                        self.moves.append([self.id, (self.y + 1), (self.x - 1)])
                     else:
-                        self.moves.append([self.id], (self.y - 1), (self.x - 1))
+                        self.moves.append([[self.id], (self.y - 1), (self.x - 1)])
         except:
             pass
 
-        try:#EN PASSANT FUNCTIONALITY
+        try:
             if to_right[1] == "p":
-                if to_left.en_passant == True:
+                if pieces[to_right].en_passant == True:
                     if self.color == "b": #black pawn
-                        self.moves.append([self.id], (self.y + 1), (self.x + 1))
+                        self.moves.append([self.id, (self.y + 1), (self.x + 1)])
                     else:
-                        self.moves.append([self.id], (self.y - 1), (self.x + 1))
+                        self.moves.append([self.id, (self.y - 1), (self.x + 1)])
         except:
             pass
         
